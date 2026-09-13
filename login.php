@@ -2,82 +2,56 @@
 
 session_start();
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 require_once "config/database.php";
-
-
-// If already logged in, go to dashboard
-
-if (isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit;
-}
-
 
 $error = "";
 
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-// Handle login
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-
+    $email = trim($_POST['email'] ?? "");
+    $password = $_POST['password'] ?? "";
 
     if (empty($email) || empty($password)) {
 
-        $error = "Please enter your email and password.";
+        $error = "Please enter email and password.";
 
     } else {
 
-        $sql = "SELECT id, name, email, password, role FROM users WHERE email = ?";
+        $stmt = $conn->prepare("
+            SELECT id, name, email, password, role
+            FROM users
+            WHERE email = ?
+            LIMIT 1
+        ");
 
-        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
 
-        if (!$stmt) {
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
 
-            $error = "Something went wrong. Please try again.";
+        if ($user && $password === $user['password']) {
+
+            session_regenerate_id(true);
+
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_role'] = $user['role'];
+
+            $stmt->close();
+            $conn->close();
+
+            header("Location: index.php");
+            exit;
 
         } else {
 
-            $stmt->bind_param("s", $email);
-
-            $stmt->execute();
-
-            $result = $stmt->get_result();
-
-            $user = $result->fetch_assoc();
-
-            $stmt->close();
-
-
-            if ($user && $password === $user['password']) {
-
-                session_regenerate_id(true);
-
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['name'];
-                $_SESSION['user_email'] = $user['email'];
-                $_SESSION['user_role'] = $user['role'];
-
-                $conn->close();
-
-                header("Location: index.php");
-                exit;
-
-            } else {
-
-                $error = "Invalid email or password.";
-
-            }
-
+            $error = "Invalid email or password.";
         }
 
+        $stmt->close();
     }
-
 }
 
 $conn->close();
@@ -93,183 +67,331 @@ $conn->close();
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0">
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Login | WorkspaceHub</title>
 
     <link
         rel="stylesheet"
-        href="assets/css/output.css">
+        href="assets/css/output.css"
+    >
 
 </head>
 
 
-<body class="min-h-screen bg-slate-950">
+<body class="min-h-screen bg-[#FFF7F8] text-[#24171d]">
 
 
-<div class="min-h-screen flex items-center justify-center p-6">
+<div class="min-h-screen flex flex-col lg:flex-row">
 
 
-    <div class="w-full max-w-md">
+    <!-- LEFT SIDE -->
+    <div
+        class="hidden lg:flex lg:w-1/2 bg-[#3B0A1E] text-white relative overflow-hidden"
+    >
+
+        <!-- Decorative circles -->
+
+        <div
+            class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-rose-500/10"
+        ></div>
+
+        <div
+            class="absolute -bottom-32 -right-20 w-96 h-96 rounded-full bg-rose-500/10"
+        ></div>
 
 
-        <!-- Logo -->
+        <div
+            class="relative z-10 flex flex-col justify-center px-16 xl:px-24 w-full"
+        >
 
-        <div class="text-center mb-8">
+            <!-- Logo -->
 
-            <h1 class="text-3xl font-bold text-white">
+            <div class="mb-12">
 
-                Workspace<span class="text-blue-500">Hub</span>
+                <h1 class="text-4xl font-bold tracking-tight">
 
-            </h1>
+                    Workspace<span class="text-rose-400">Hub</span>
 
-            <p class="text-slate-400 mt-2">
+                </h1>
 
-                Meeting Management System
+                <p class="text-white/60 mt-2">
+                    Meeting Management System
+                </p>
 
-            </p>
-
-        </div>
-
-
-        <!-- Login Card -->
-
-        <div class="bg-white rounded-2xl shadow-xl p-8">
+            </div>
 
 
-            <div class="mb-7">
+            <!-- Main Text -->
 
-                <h2 class="text-2xl font-bold text-slate-900">
+            <div>
 
-                    Welcome back
+                <p
+                    class="text-rose-400 text-sm font-semibold uppercase tracking-widest mb-4"
+                >
+                    Workspace Management
+                </p>
 
+                <h2
+                    class="text-4xl xl:text-5xl font-bold leading-tight"
+                >
+                    Find the perfect<br>
+                    space for your<br>
+                    next meeting.
                 </h2>
 
-                <p class="text-slate-500 mt-2">
-
-                    Sign in to manage your workspace bookings.
-
+                <p
+                    class="text-white/60 mt-6 max-w-md leading-7"
+                >
+                    Manage meeting rooms, schedule bookings and
+                    keep your workspace organized from one place.
                 </p>
 
             </div>
 
 
-            <!-- Error -->
+            <!-- Bottom -->
 
-            <?php if (!empty($error)): ?>
+            <div class="mt-14 flex gap-8">
 
-                <div
-                    class="mb-6 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
+                <div>
 
-                    <?= htmlspecialchars($error) ?>
+                    <p class="text-2xl font-bold">
+                        3
+                    </p>
 
-                </div>
-
-            <?php endif; ?>
-
-
-            <!-- Form -->
-
-            <form
-                method="POST"
-                action="login.php">
-
-
-                <!-- Email -->
-
-                <div class="mb-5">
-
-                    <label
-                        for="email"
-                        class="block text-sm font-medium text-slate-700 mb-2">
-
-                        Email Address
-
-                    </label>
-
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                        placeholder="admin@workspacehub.com"
-                        required
-                        class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <p class="text-sm text-white/50">
+                        Workspaces
+                    </p>
 
                 </div>
 
 
-                <!-- Password -->
+                <div>
 
-                <div class="mb-6">
+                    <p class="text-2xl font-bold">
+                        24/7
+                    </p>
 
-                    <label
-                        for="password"
-                        class="block text-sm font-medium text-slate-700 mb-2">
-
-                        Password
-
-                    </label>
-
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        required
-                        class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <p class="text-sm text-white/50">
+                        Management
+                    </p>
 
                 </div>
 
 
-                <!-- Login -->
+                <div>
 
-                <button
-                    type="submit"
-                    class="w-full py-3.5 rounded-xl bg-slate-900 text-white font-medium hover:bg-blue-600 transition">
+                    <p class="text-2xl font-bold">
+                        Easy
+                    </p>
 
-                    Sign In
+                    <p class="text-sm text-white/50">
+                        Booking
+                    </p>
 
-                </button>
-
-
-            </form>
-
-
-            <!-- Development Account -->
-
-            <div class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
-
-                <p class="text-xs text-slate-400 uppercase tracking-wide">
-
-                    Development Login
-
-                </p>
-
-                <p class="text-sm text-slate-600 mt-2">
-
-                    admin@workspacehub.com
-
-                </p>
-
-                <p class="text-sm text-slate-600">
-
-                    Password: password
-
-                </p>
+                </div>
 
             </div>
-
 
         </div>
 
+    </div>
 
-        <p class="text-center text-xs text-slate-500 mt-6">
 
-            © <?= date('Y') ?> WorkspaceHub
 
-        </p>
+    <!-- RIGHT SIDE -->
 
+    <div
+        class="flex-1 flex items-center justify-center px-5 py-10 sm:px-8"
+    >
+
+        <div class="w-full max-w-md">
+
+
+            <!-- Mobile Logo -->
+
+            <div class="lg:hidden text-center mb-8">
+
+                <h1 class="text-3xl font-bold">
+
+                    Workspace<span class="text-rose-600">Hub</span>
+
+                </h1>
+
+                <p class="text-sm text-[#6B5B63] mt-2">
+                    Meeting Management System
+                </p>
+
+            </div>
+
+
+
+            <!-- Login Card -->
+
+            <div
+                class="bg-white rounded-3xl border border-rose-100 shadow-sm p-7 sm:p-9"
+            >
+
+
+                <!-- Heading -->
+
+                <div class="mb-8">
+
+                    <p
+                        class="text-sm font-semibold text-rose-600 mb-2"
+                    >
+                        Welcome back
+                    </p>
+
+                    <h2
+                        class="text-3xl font-bold text-[#24171d]"
+                    >
+                        Sign in
+                    </h2>
+
+                    <p
+                        class="text-[#6B5B63] mt-2"
+                    >
+                        Sign in to manage your workspace bookings.
+                    </p>
+
+                </div>
+
+
+
+                <!-- Error -->
+
+                <?php if (!empty($error)): ?>
+
+                    <div
+                        class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    >
+
+                        <?= htmlspecialchars($error) ?>
+
+                    </div>
+
+                <?php endif; ?>
+
+
+
+                <!-- Login Form -->
+
+                <form method="POST" class="space-y-5">
+
+
+                    <!-- Email -->
+
+                    <div>
+
+                        <label
+                            for="email"
+                            class="block text-sm font-semibold text-[#24171d] mb-2"
+                        >
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                            placeholder="Enter your email"
+                            required
+                            autocomplete="email"
+                            class="w-full rounded-xl border border-gray-200 px-4 py-3.5 text-sm outline-none transition focus:border-rose-500 focus:ring-4 focus:ring-rose-100"
+                        >
+
+                    </div>
+
+
+
+                    <!-- Password -->
+
+                    <div>
+
+                        <div class="flex items-center justify-between mb-2">
+
+                            <label
+                                for="password"
+                                class="block text-sm font-semibold text-[#24171d]"
+                            >
+                                Password
+                            </label>
+
+                        </div>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                            class="w-full rounded-xl border border-gray-200 px-4 py-3.5 text-sm outline-none transition focus:border-rose-500 focus:ring-4 focus:ring-rose-100"
+                        >
+
+                    </div>
+
+
+
+                    <!-- Sign In Button -->
+
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl bg-[#3B0A1E] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#4d0d29] focus:outline-none focus:ring-4 focus:ring-rose-100"
+                    >
+
+                        Sign In
+
+                    </button>
+
+
+                </form>
+
+
+
+                <!-- Development Login -->
+
+                <div
+                    class="mt-7 rounded-xl bg-rose-50 border border-rose-100 p-4"
+                >
+
+                    <p
+                        class="text-xs font-semibold uppercase tracking-wide text-rose-600 mb-2"
+                    >
+                        Development Login
+                    </p>
+
+                    <p class="text-sm text-[#6B5B63]">
+                        <span class="font-medium">Email:</span>
+                        admin@workspacehub.com
+                    </p>
+
+                    <p class="text-sm text-[#6B5B63] mt-1">
+                        <span class="font-medium">Password:</span>
+                        admin123
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- Footer -->
+
+            <p
+                class="text-center text-xs text-[#9b858e] mt-6"
+            >
+                © <?= date('Y') ?> WorkspaceHub. All rights reserved.
+            </p>
+
+
+        </div>
 
     </div>
 

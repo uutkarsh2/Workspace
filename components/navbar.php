@@ -7,52 +7,167 @@ $user_role = $_SESSION['user_role'] ?? 'User';
 
 ?>
 
-<aside class="w-64 min-h-screen bg-slate-900 text-white flex flex-col shrink-0">
+<!-- ========================================= -->
+<!-- MOBILE TOP BAR -->
+<!-- ========================================= -->
 
-    <!-- ========================= -->
+<div
+    class="lg:hidden fixed top-0 left-0 right-0 z-40
+           h-16 bg-[#3b0a1e] text-white
+           flex items-center justify-between
+           px-4 shadow-lg">
+
+    <!-- Hamburger -->
+
+    <button
+        id="openSidebar"
+        type="button"
+        class="w-10 h-10 rounded-xl
+               flex items-center justify-center
+               text-2xl
+               hover:bg-white/10
+               transition">
+
+        ☰
+
+    </button>
+
+
+    <!-- Logo -->
+
+    <h1 class="text-lg font-bold">
+
+        Workspace<span class="text-pink-400">Hub</span>
+
+    </h1>
+
+
+    <!-- User -->
+
+    <div
+        class="w-9 h-9 rounded-full
+               bg-pink-600
+               flex items-center justify-center
+               font-semibold">
+
+        <?= strtoupper(substr($user_name, 0, 1)) ?>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- OVERLAY -->
+<!-- ========================================= -->
+
+<div
+    id="sidebarOverlay"
+    class="fixed inset-0 z-40
+           bg-black/60 hidden lg:hidden">
+</div>
+
+
+<!-- ========================================= -->
+<!-- SIDEBAR -->
+<!-- ========================================= -->
+
+<aside
+    id="sidebar"
+    class="fixed lg:static
+           inset-y-0 left-0
+           z-50
+           w-64
+           min-h-screen
+           bg-[#3b0a1e]
+           text-white
+           flex flex-col
+           shrink-0
+
+           -translate-x-full
+           lg:translate-x-0
+
+           transition-transform
+           duration-300
+           ease-in-out">
+
+
+    <!-- ========================================= -->
     <!-- LOGO -->
-    <!-- ========================= -->
+    <!-- ========================================= -->
 
-    <div class="px-8 py-7 border-b border-slate-700">
+    <div class="px-7 py-7 border-b border-white/10">
 
-        <h1 class="text-2xl font-bold">
-            Workspace<span class="text-blue-500">Hub</span>
-        </h1>
+        <div class="flex items-center justify-between">
 
-        <p class="text-sm text-slate-400 mt-1">
+            <h1 class="text-2xl font-bold">
+
+                Workspace<span class="text-pink-400">Hub</span>
+
+            </h1>
+
+
+            <!-- Close -->
+
+            <button
+                id="closeSidebar"
+                type="button"
+                class="lg:hidden
+                       w-9 h-9
+                       rounded-lg
+                       text-white/60
+                       hover:text-white
+                       hover:bg-white/10
+                       transition">
+
+                ✕
+
+            </button>
+
+        </div>
+
+
+        <p class="text-sm text-white/50 mt-1">
+
             Meeting Management
+
         </p>
 
     </div>
 
 
-    <!-- ========================= -->
+    <!-- ========================================= -->
     <!-- NAVIGATION -->
-    <!-- ========================= -->
+    <!-- ========================================= -->
 
-    <nav class="flex-1 px-5 py-8">
+    <nav class="flex-1 px-4 py-7 overflow-y-auto">
 
-        <p class="text-xs uppercase tracking-wider text-slate-500 px-4 mb-4">
+
+        <p class="text-xs uppercase
+                  tracking-wider
+                  text-white/40
+                  px-4 mb-4">
+
             Menu
+
         </p>
 
 
-        <!-- ========================= -->
-        <!-- DASHBOARD -->
-        <!-- ========================= -->
+        <!-- Dashboard -->
 
         <a
             href="/Project/index.php"
-            class="flex items-center gap-4 px-4 py-3 rounded-xl mb-2 transition
-            <?php
-            echo $current_page === 'index.php'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white';
-            ?>">
+            class="flex items-center gap-4
+                   px-4 py-3.5
+                   rounded-xl mb-2
+                   transition
 
-            <span class="text-lg">
-                ▦
-            </span>
+                   <?= $current_page === 'index.php'
+                       ? 'bg-pink-600 text-white shadow-lg shadow-pink-950/30'
+                       : 'text-white/70 hover:bg-white/10 hover:text-white'
+                   ?>">
+
+            <span class="text-xl">▦</span>
 
             <span class="font-medium">
                 Dashboard
@@ -61,22 +176,21 @@ $user_role = $_SESSION['user_role'] ?? 'User';
         </a>
 
 
-        <!-- ========================= -->
-        <!-- WORKSPACES -->
-        <!-- ========================= -->
+        <!-- Workspaces -->
 
         <a
             href="/Project/pages/workspaces.php"
-            class="flex items-center gap-4 px-4 py-3 rounded-xl mb-2 transition
-            <?php
-            echo $current_page === 'workspaces.php'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white';
-            ?>">
+            class="flex items-center gap-4
+                   px-4 py-3.5
+                   rounded-xl mb-2
+                   transition
 
-            <span class="text-lg">
-                □
-            </span>
+                   <?= $current_page === 'workspaces.php'
+                       ? 'bg-pink-600 text-white shadow-lg shadow-pink-950/30'
+                       : 'text-white/70 hover:bg-white/10 hover:text-white'
+                   ?>">
+
+            <span class="text-xl">□</span>
 
             <span class="font-medium">
                 Workspaces
@@ -85,46 +199,22 @@ $user_role = $_SESSION['user_role'] ?? 'User';
         </a>
 
 
-        <!-- ========================= -->
-        <!-- MEETINGS -->
-        <!-- ========================= -->
-
-        <a
-            href="/Project/pages/meetings.php"
-            class="flex items-center gap-4 px-4 py-3 rounded-xl mb-2 transition
-            <?php
-            echo $current_page === 'meetings.php'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white';
-            ?>">
-
-            <span class="text-lg">
-                ◷
-            </span>
-
-            <span class="font-medium">
-                Meetings
-            </span>
-
-        </a>
-
-
-        <!-- ========================= -->
-        <!-- MY BOOKINGS -->
-        <!-- ========================= -->
+    
+        <!-- My Bookings -->
 
         <a
             href="/Project/pages/mybooking.php"
-            class="flex items-center gap-4 px-4 py-3 rounded-xl mb-2 transition
-            <?php
-            echo $current_page === 'mybooking.php'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white';
-            ?>">
+            class="flex items-center gap-4
+                   px-4 py-3.5
+                   rounded-xl mb-2
+                   transition
 
-            <span class="text-lg">
-                ▤
-            </span>
+                   <?= $current_page === 'mybooking.php'
+                       ? 'bg-pink-600 text-white shadow-lg shadow-pink-950/30'
+                       : 'text-white/70 hover:bg-white/10 hover:text-white'
+                   ?>">
+
+            <span class="text-xl">▤</span>
 
             <span class="font-medium">
                 My Bookings
@@ -133,29 +223,24 @@ $user_role = $_SESSION['user_role'] ?? 'User';
         </a>
 
 
-        <!-- ========================= -->
-        <!-- DIVIDER -->
-        <!-- ========================= -->
-
-        <div class="border-t border-slate-700 my-8"></div>
+        <div class="border-t border-white/10 my-7"></div>
 
 
-        <!-- ========================= -->
-        <!-- SETTINGS -->
-        <!-- ========================= -->
+        <!-- Settings -->
 
         <a
             href="/Project/pages/settings.php"
-            class="flex items-center gap-4 px-4 py-3 rounded-xl transition
-            <?php
-            echo $current_page === 'settings.php'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white';
-            ?>">
+            class="flex items-center gap-4
+                   px-4 py-3.5
+                   rounded-xl
+                   transition
 
-            <span class="text-lg">
-                ⚙
-            </span>
+                   <?= $current_page === 'settings.php'
+                       ? 'bg-pink-600 text-white shadow-lg shadow-pink-950/30'
+                       : 'text-white/70 hover:bg-white/10 hover:text-white'
+                   ?>">
+
+            <span class="text-xl">⚙</span>
 
             <span class="font-medium">
                 Settings
@@ -166,28 +251,25 @@ $user_role = $_SESSION['user_role'] ?? 'User';
     </nav>
 
 
-    <!-- ========================= -->
-    <!-- USER / LOGOUT -->
-    <!-- ========================= -->
+    <!-- ========================================= -->
+    <!-- USER -->
+    <!-- ========================================= -->
 
-    <div class="px-5 py-6 border-t border-slate-700">
+    <div class="px-5 py-6 border-t border-white/10">
 
 
-        <!-- User Information -->
-
-        <div class="flex items-center gap-3 px-3 mb-5">
-
-            <!-- Avatar -->
+        <div class="flex items-center gap-3 px-2 mb-5">
 
             <div
-                class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                class="w-11 h-11 rounded-full
+                       bg-pink-600
+                       flex items-center justify-center
+                       font-semibold shrink-0">
 
                 <?= strtoupper(substr($user_name, 0, 1)) ?>
 
             </div>
 
-
-            <!-- Name -->
 
             <div class="min-w-0">
 
@@ -197,7 +279,7 @@ $user_role = $_SESSION['user_role'] ?? 'User';
 
                 </p>
 
-                <p class="text-xs text-slate-400 capitalize">
+                <p class="text-xs text-white/50 capitalize">
 
                     <?= htmlspecialchars($user_role) ?>
 
@@ -212,11 +294,15 @@ $user_role = $_SESSION['user_role'] ?? 'User';
 
         <a
             href="/Project/logout.php"
-            class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition">
+            class="flex items-center gap-4
+                   px-4 py-3
+                   rounded-xl
+                   text-white/70
+                   hover:bg-white/10
+                   hover:text-white
+                   transition">
 
-            <span class="text-lg">
-                ↪
-            </span>
+            <span class="text-xl">↪</span>
 
             <span class="font-medium">
                 Logout
@@ -227,3 +313,90 @@ $user_role = $_SESSION['user_role'] ?? 'User';
     </div>
 
 </aside>
+
+
+<!-- ========================================= -->
+<!-- SIDEBAR JAVASCRIPT -->
+<!-- ========================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const sidebar = document.getElementById("sidebar");
+    const openBtn = document.getElementById("openSidebar");
+    const closeBtn = document.getElementById("closeSidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+
+
+    function openMenu() {
+
+        sidebar.classList.remove("-translate-x-full");
+
+        overlay.classList.remove("hidden");
+
+        document.body.classList.add("overflow-hidden");
+
+    }
+
+
+    function closeMenu() {
+
+        sidebar.classList.add("-translate-x-full");
+
+        overlay.classList.add("hidden");
+
+        document.body.classList.remove("overflow-hidden");
+
+    }
+
+
+    if (openBtn) {
+        openBtn.addEventListener("click", openMenu);
+    }
+
+
+    if (closeBtn) {
+        closeBtn.addEventListener("click", closeMenu);
+    }
+
+
+    if (overlay) {
+        overlay.addEventListener("click", closeMenu);
+    }
+
+
+    // Close sidebar after navigation on mobile
+
+    const links = sidebar.querySelectorAll("a");
+
+    links.forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            if (window.innerWidth < 1024) {
+                closeMenu();
+            }
+
+        });
+
+    });
+
+
+    // Reset mobile menu on desktop
+
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth >= 1024) {
+
+            overlay.classList.add("hidden");
+
+            document.body.classList.remove("overflow-hidden");
+
+        }
+
+    });
+
+});
+
+</script>
